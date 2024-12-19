@@ -24,7 +24,7 @@ function App() {
 
   useEffect(() => {
     socket.connect();
-
+    console.log("Connected to socket", subathonStartedUnix);
     socket.on(
       "subathonUpdate",
       (data: { events: Event[]; timeRemaining: number; isActive: boolean }) => {
