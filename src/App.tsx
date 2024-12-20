@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ClockComponent from "./components/ClockComponent";
 
-const socket = io("https://subathon-api.onrender.com");
+const socket = io("http://localhost:8000");
 
 type Event = {
   event: string;
@@ -23,6 +23,16 @@ type SubathonConfig = {
   };
   goals: Map<number, string>;
   points: number;
+};
+
+const convertGoalsToMap = (
+  goals: Record<string, string>
+): Map<number, string> => {
+  const map = new Map();
+  Object.entries(goals).forEach(([key, value]) => {
+    map.set(Number(key), value);
+  });
+  return map;
 };
 
 function App() {
@@ -43,7 +53,7 @@ function App() {
         events: Event[];
         timeRemaining: number;
         isActive: boolean;
-        config: SubathonConfig;
+        config: SubathonConfig & { goals: Record<string, string> };
       }) => {
         console.log("Subathon update", data);
         setIsActive(data.isActive);
@@ -51,8 +61,13 @@ function App() {
           const now = Math.floor(Date.now() / 1000);
           setSubathonEndsUnix(now + data.timeRemaining);
         }
-        setEventList(data.events.slice(0, 5));
-        setConfig(data.config);
+        setEventList(data.events.slice(-5));
+
+        const configWithMap = {
+          ...data.config,
+          goals: convertGoalsToMap(data.config.goals),
+        };
+        setConfig(configWithMap);
         setPoints(data.config.points);
       }
     );
@@ -79,11 +94,12 @@ function App() {
     <ScrollArea className="h-[200px] w-full rounded-md mt-4">
       <div className="space-y-2">
         {config &&
+          config.goals &&
           Array.from(config.goals.entries()).map(([points, goal]) => (
             <Card
               key={points}
               className={`${
-                points <= points ? "bg-green-800" : "bg-transparent"
+                points <= config.points ? "bg-green-800" : "bg-transparent"
               } border-none`}
             >
               <CardContent className="p-2">
