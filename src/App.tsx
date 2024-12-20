@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ClockComponent from "./components/ClockComponent";
 
-const socket = io("http://localhost:8000");
+const socket = io("https://subathon-api.onrender.com");
 
 type Event = {
   event: string;
